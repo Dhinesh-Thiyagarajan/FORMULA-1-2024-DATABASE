@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>F1 2024 Season</title>
+<style>
+  /* --- Base & Fonts --- */
+  body {
+    font-family: 'Nunito', Arial, sans-serif;
+    background: #F6F6F4;
+    color: #191A1D;
+    margin: 0;
+    line-height: 1.6;
+  }
+  header {
+    background-color: #FF0000;
+    color: #fff;
+    padding: 18px 10px;
+    text-align: center;
+    font-size: clamp(24px, 5vw, 32px);
+    letter-spacing: 2px;
+    font-weight: bold;
+    font-family: 'Montserrat', Arial, sans-serif;
+  }
+  main {
+    max-width: 1200px;
+    margin: 26px auto;
+    padding: 16px 22px 36px 22px;
+    background: #fff;
+    border-radius: 13px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  }
+  h2 {
+    font-size: clamp(1.8rem, 4vw, 2.25rem);
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-weight: bold;
+    margin-top: 0;
+    margin-bottom: 26px;
+    color: #23252A;
+    letter-spacing: 1.5px;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 10px;
+  }
+
+  /* --- Navigation --- */
+  nav {
+    background-color: #fff;
+    box-shadow: 0 2px 8px rgba(255, 0, 0, 0.05);
+    padding: 5px 10px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 5px 10px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  nav a {
+    color: #191A1D;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: clamp(16px, 3vw, 19px);
+    padding: 15px 10px 10px 10px;
+    border-bottom: 3px solid transparent;
+    transition: border-bottom 0.2s, color 0.2s;
+    letter-spacing: 0.7px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  nav a.selected {
+    border-bottom-color: #FF0000;
+    color: #FF0000;
+  }
+
+  /* --- Dropdown Controls --- */
+  .results-controls {
+      display: flex;
+      gap: 15px 20px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+      align-items: center;
+  }
+  .selector-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+  }
+  .selector-group label {
+    font-weight: bold;
+    font-size: 1rem;
+    color: #33353A;
+    white-space: nowrap;
+  }
+  .selector-group select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: #fff;
+    font-family: 'Nunito', Arial, sans-serif;
+    font-size: 0.95rem;
+    color: #191A1D;
+    padding: 8px 30px 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    min-width: 180px;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%23FF0000" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 14px 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .selector-group select:focus {
+    outline: none;
+    border-color: #FF0000;
+    box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.2);
+  }
+   .selector-group select:hover {
+     border-color: #b3b3b3;
+   }
+
+  /* --- Tables --- */
+  .table-container {
+      overflow-x: auto; /* Container handles scrolling */
+  }
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 15px;
+    font-size: 1rem;
+    min-width: 800px; /* Prevent squashing on wide screens */
+  }
+  th, td {
+    padding: 12px 10px;
+    text-align: left;
+    white-space: nowrap;
+    border-bottom: 1px solid #eee;
+  }
+  thead th {
+    background: #F6F6F4;
+    color: #23252A;
+    font-size: 0.9rem;
+    font-weight: bold;
+    border-bottom: 2px solid #FF0000;
+    letter-spacing: 1px;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  tbody tr:hover td {
+    background: #FFECEF;
+  }
+  td {
+    color: #33353A;
+  }
+  td:first-child, th:first-child {
+      padding-left: 0;
+  }
+   td:last-child, th:last-child {
+       padding-right: 0;
+   }
+
+  /* --- Sections --- */
+  section {
+    display: none;
+  }
+  section.active {
+    display: block;
+    animation: fadeIn 0.4s ease-out;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* --- Teams Section --- */
+  .team-card {
+    border-bottom: 1px solid #E6E6E6;
+    margin-bottom: 15px;
+    padding: 15px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .team-card:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+  .team-card h3 {
+    font-size: 1.25rem;
+    margin: 0 0 5px 0;
+    color: #FF0000;
+    font-family: 'Montserrat', Arial, sans-serif;
+  }
+  .team-drivers {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    text-align: right;
+  }
+  .team-drivers li {
+    margin-bottom: 3px;
+    font-size: 0.95rem;
+    color: #191A1D;
+    font-weight: 500;
+  }
+   .team-drivers li:last-child {
+       margin-bottom: 0;
+   }
+  .team-details {
+    color: #555;
+    font-size: 0.9rem;
+  }
+
+  /* --- Responsive Adjustments --- */
+  @media (max-width: 768px) {
+    nav {
+        justify-content: space-around;
+        padding: 5px 5px;
+    }
+    nav a {
+        font-size: 16px;
+        padding: 12px 5px 8px 5px;
+        margin: 0;
+    }
+    main {
+        margin: 15px;
+        padding: 15px;
+    }
+    h2 {
+        font-size: 1.6rem;
+    }
+    .results-controls {
+        gap: 10px;
+    }
+    .selector-group label {
+        font-size: 0.95rem;
+    }
+    .selector-group select {
+        min-width: 150px;
+        font-size: 0.9rem;
+        padding: 6px 25px 6px 10px;
+        background-position: right 8px center;
+        background-size: 12px 12px;
+    }
+    th, td {
+        font-size: 0.9rem;
+        padding: 10px 8px;
+    }
+    .team-card {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .team-drivers {
+        text-align: left;
+        margin-top: 5px;
+    }
+  }
+
+</style>
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<header>
+  FORMULA 1 &mdash; 2024 SEASON
+</header>
+<nav>
+  <a onclick="showSection('results')" id="tab-results">Results</a>
+  <a onclick="showSection('standings')" id="tab-standings">Drivers</a>
+  <a onclick="showSection('teams')" id="tab-teams">Teams</a>
+  <a onclick="showSection('calendar')" id="tab-calendar">Calendar</a>
+</nav>
+<main>
+  <!-- Combined Results Section -->
+  <section id="results" class="active">
+    <h2>2024 Session Results</h2>
+    <div class="results-controls">
+      <div class="selector-group">
+        <label for="results-race-select">Grand Prix:</label>
+        <select id="results-race-select" onchange="handleRaceSelectionChange(this.value)">
+          <option value="All">All Races</option>
+        </select>
+      </div>
+      <div class="selector-group">
+        <label for="results-session-select">Session:</label>
+        <select id="results-session-select" onchange="displaySessionResults()">
+          <option value="RACE">Race Result</option>
+        </select>
+      </div>
+    </div>
+    <div class="table-container">
+        <table>
+          <thead>
+            <!-- Header is dynamically updated -->
+          </thead>
+          <tbody>
+            <!-- Filled dynamically -->
+          </tbody>
+        </table>
+    </div>
+  </section>
+
+  <!-- Driver Standings -->
+  <section id="standings">
+    <h2>Championship Standings</h2>
+    <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Driver</th>
+              <th>Team</th>
+              <th>Points</th>
+              <th>Races</th>
+            </tr>
+          </thead>
+          <tbody>
+             </tbody>
+        </table>
+    </div>
+  </section>
+
+  <!-- Teams & Drivers -->
+  <section id="teams">
+    <h2>Teams & Drivers</h2>
+    <div id="teams-list"> </div>
+  </section>
+
+  <!-- Calendar -->
+  <section id="calendar">
+    <h2>2024 Grand Prix Calendar</h2>
+    <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Grand Prix</th>
+              <th>Date</th>
+              <th>Circuit</th>
+              <th>Location</th>
+              <th>Country</th>
+              <th>Sprint</th>
+            </tr>
+          </thead>
+          <tbody>
+             </tbody>
+        </table>
+    </div>
+  </section>
+</main>
+
+<script>
+  // --- Global variables ---
+  let grandPrixCalendar = [];
+  let allResultsData = null;
+  let activeSection = 'results';
+
+  // --- Core Functions ---
+  async function loadInitialData() {
+      console.log("Loading initial data...");
+      try {
+          const [calRes, resultsRes] = await Promise.all([
+              fetch('http://localhost:3001/api/calendar'),
+              fetch('http://localhost:3001/api/allresults') // Use the single, consolidated endpoint
+          ]);
+
+          if (!calRes.ok) throw new Error(`Calendar API Error! status: ${calRes.status}`);
+          grandPrixCalendar = await calRes.json();
+          console.log("Calendar loaded:", grandPrixCalendar.length, "races");
+          populateRaceDropdown(grandPrixCalendar);
+
+          if (!resultsRes.ok) throw new Error(`Results API Error! status: ${resultsRes.status}`);
+          allResultsData = await resultsRes.json();
+          console.log("All results data loaded:", allResultsData.length, "entries");
+
+          showSection(activeSection);
+      } catch (error) {
+          console.error("Error fetching initial data:", error);
+          displayErrorInAllTables("Error loading initial data. Check API endpoints and DB connection.");
+      }
+  }
+
+  function populateRaceDropdown(raceData) {
+      const selectElement = document.getElementById('results-race-select');
+      if (!selectElement) return;
+      const sortedRaces = [...raceData].sort((a, b) => new Date(a.race_date) - new Date(b.race_date));
+      selectElement.innerHTML = `<option value="All">All Races</option>`;
+      sortedRaces.forEach(race => {
+          const option = document.createElement('option');
+          option.value = race.grand_prix;
+          option.textContent = race.grand_prix;
+          selectElement.appendChild(option);
+      });
+      populateSessionDropdown('All');
+  }
+
+  function populateSessionDropdown(selectedGrandPrix) {
+      const sessionSelect = document.getElementById('results-session-select');
+      if (!sessionSelect) return;
+      const previouslySelectedSession = sessionSelect.value;
+      sessionSelect.innerHTML = '';
+
+      let availableSessions = [];
+      if (selectedGrandPrix !== 'All') {
+          const raceInfo = grandPrixCalendar.find(r => r.grand_prix === selectedGrandPrix);
+          const isSprint = raceInfo?.sprint_weekend === 'Yes' || raceInfo?.is_sprint_weekend === true;
+          availableSessions = isSprint
+              ? ['RACE', 'QUALIFYING', 'SPRINT', 'SPRINT_QUALIFYING', 'FP1']
+              : ['RACE', 'QUALIFYING', 'FP3', 'FP2', 'FP1'];
+      } else {
+           availableSessions = ['RACE', 'QUALIFYING', 'SPRINT', 'FP1', 'FP2', 'FP3'];
+      }
+
+       availableSessions.forEach(sessionType => {
+           if (allResultsData?.some(r => r.session_type === sessionType && (selectedGrandPrix === 'All' || r.grand_prix === selectedGrandPrix))) {
+                const option = document.createElement('option');
+                option.value = sessionType;
+                option.textContent = formatSessionName(sessionType);
+                sessionSelect.appendChild(option);
+           }
+       });
+
+       if (sessionSelect.querySelector(`option[value="${previouslySelectedSession}"]`)) {
+           sessionSelect.value = previouslySelectedSession;
+       } else if (sessionSelect.querySelector('option[value="RACE"]')) {
+           sessionSelect.value = 'RACE';
+       } else if (sessionSelect.options.length > 0) {
+           sessionSelect.value = sessionSelect.options[0].value;
+       } else {
+            sessionSelect.innerHTML = '<option value="">No sessions found</option>';
+       }
+  }
+
+  function formatSessionName(sessionType) {
+      return (sessionType || '')
+          .replace('RACE', 'Race Result')
+          .replace('QUALIFYING', 'Qualifying')
+          .replace('SPRINT_', 'Sprint ')
+          .replace('FP1', 'Practice 1')
+          .replace('FP2', 'Practice 2')
+          .replace('FP3', 'Practice 3');
+  }
+
+  function handleRaceSelectionChange(selectedGrandPrix) {
+      populateSessionDropdown(selectedGrandPrix);
+      displaySessionResults();
+  }
+
+ function displaySessionResults() {
+    const selectedGrandPrix = document.getElementById('results-race-select').value;
+    const selectedSession = document.getElementById('results-session-select').value;
+    console.log(`Displaying results for GP: ${selectedGrandPrix}, Session: ${selectedSession}`);
+
+    const thead = document.querySelector(`#results table thead`);
+    const tbody = document.querySelector(`#results table tbody`);
+    if (!tbody || !thead) return;
+    tbody.innerHTML = '';
+    thead.innerHTML = '';
+
+    if (!allResultsData) {
+        displayErrorInTable('results', `Results data not loaded yet.`);
+        return;
+    }
+
+    let filteredResults = [];
+    let tableHeaders = [];
+
+    if (['RACE', 'SPRINT'].includes(selectedSession)) {
+        tableHeaders = ['Grand Prix', 'Pos', 'Driver', 'Team', 'Laps', 'Time/Status', 'Pts'];
+    } else {
+        tableHeaders = ['Grand Prix', 'Pos', 'Driver', 'Team', 'Time', 'Session'];
+    }
+
+    // --- Filter Data ---
+    if (selectedGrandPrix === 'All') {
+        const topResultMap = {};
+        allResultsData.forEach(r => {
+            if (r.session_type === selectedSession && r.final_position === 1) {
+                 const raceInfo = grandPrixCalendar.find(cal => cal.grand_prix === r.grand_prix);
+                 const raceDate = raceInfo?.race_date || '9999-12-31';
+                 if (!topResultMap[r.grand_prix]) {
+                     topResultMap[r.grand_prix] = { ...r, race_date: raceDate };
+                 }
+            }
+        });
+        filteredResults = Object.values(topResultMap).sort((a, b) => new Date(a.race_date) - new Date(b.race_date));
+    } else {
+        filteredResults = allResultsData
+           .filter(r => r.grand_prix === selectedGrandPrix && r.session_type === selectedSession)
+           .sort((a, b) => (a.final_position ?? Infinity) - (b.final_position ?? Infinity));
+    }
+
+    // --- Populate Header ---
+    let headerHtml = '<tr>';
+    tableHeaders.forEach(header => headerHtml += `<th>${header}</th>`);
+    headerHtml += '</tr>';
+    thead.innerHTML = headerHtml;
+
+    // --- Populate Body ---
+    if (filteredResults.length === 0) {
+        const message = selectedGrandPrix === 'All' ? `No P1 results found for ${formatSessionName(selectedSession)}.` : `No results found for ${selectedGrandPrix} - ${formatSessionName(selectedSession)}.`;
+        displayErrorInTable('results', message);
+        return;
+    }
+
+    filteredResults.forEach(item => {
+        const row = document.createElement('tr');
+        let rowHtml = '';
+        tableHeaders.forEach(header => {
+            let cellValue = '-';
+            switch(header.toLowerCase()) {
+                case 'grand prix': cellValue = item.grand_prix || '-'; break;
+                case 'pos': cellValue = item.final_position ?? '-'; break;
+                case 'driver': cellValue = item.driver_name || 'N/A'; break;
+                case 'team': cellValue = item.team_name || 'N/A'; break;
+                case 'laps': cellValue = item.laps_completed ?? '-'; break;
+                case 'time/status': cellValue = item.time_or_status || '-'; break;
+                case 'time': cellValue = item.time_or_status || '-'; break;
+                case 'pts': cellValue = item.points ?? '-'; break;
+                case 'session': cellValue = formatSessionName(item.session_type || ''); break;
+                default: cellValue = '-'; break;
+            }
+            rowHtml += `<td>${cellValue}</td>`;
+        });
+        row.innerHTML = rowHtml;
+        tbody.appendChild(row);
+    });
+}
+
+  // Switch active section and trigger data load if necessary
+  function showSection(id) {
+    activeSection = id;
+    document.querySelectorAll('nav a').forEach(el => el.classList.remove('selected'));
+    const tabElement = document.getElementById(`tab-${id}`);
+    if (tabElement) tabElement.classList.add('selected');
+
+    document.querySelectorAll('main section').forEach(section => {
+        section.classList.toggle('active', section.id === id);
+    });
+
+    if (id === 'results') {
+        if (allResultsData) displaySessionResults();
+    } else if (id === 'teams' && document.getElementById("teams-list").innerHTML.trim() === '') {
+        fetchAndFill('http://localhost:3001/api/teams', 'teams');
+    } else if (id === 'calendar' && document.querySelector(`#calendar table tbody`).innerHTML.trim() === '') {
+        fetchAndFill('http://localhost:3001/api/calendar', 'calendar', ['grand_prix', 'race_date', 'circuit_name', 'location', 'country', 'sprint_weekend']);
+    } else if (id === 'standings' && document.querySelector(`#standings table tbody`).innerHTML.trim() === '') {
+        fetchAndFill('http://localhost:3001/api/standings', 'standings', ['driver_name', 'team_name', 'total_points', 'races_participated']);
+    }
+  }
+
+  // Fetches and fills sections OTHER than results
+  async function fetchAndFill(api, section, cols) {
+      try {
+         if (section === "teams") {
+           const res = await fetch(api);
+           if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+           const data = await res.json();
+           const teams = {};
+           for (const row of data) {
+              const teamNameKey = row.team_name;
+              if (!teams[teamNameKey]) {
+                teams[teamNameKey] = { engine: row.engine_supplier, drivers: [] };
+              }
+              const driverDetail = row.driver_name + (row.country_code ? ` (${row.country_code})` : "");
+              if (!teams[teamNameKey].drivers.includes(driverDetail)) {
+                  teams[teamNameKey].drivers.push(driverDetail);
+              }
+           }
+           let content = "";
+           const sortedTeamNames = Object.keys(teams).sort();
+           for (const teamName of sortedTeamNames) {
+              const info = teams[teamName];
+              content += `
+              <div class="team-card">
+                <div>
+                  <h3>${teamName}</h3> <!-- Removed nationality -->
+                  <div class="team-details"><b>Engine:</b> ${info.engine || 'N/A'}</div>
+                </div>
+                <ul class="team-drivers">
+                    ${info.drivers.sort().map(d => `<li>${d}</li>`).join("")} <!-- Sort drivers -->
+                </ul>
+              </div>`;
+           }
+           document.getElementById("teams-list").innerHTML = content;
+         } else if (section === "calendar" || section === "standings") {
+             const res = await fetch(api);
+             if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+             const data = await res.json();
+             let rows = '';
+             for (const item of data) {
+                 rows += '<tr>';
+                 for (const col of cols) {
+                     let value = item[col] ?? '-';
+                     if (col === "race_date") {
+                         value = formatDate(item[col]);
+                     } else if (col === 'sprint_weekend') {
+                        value = (value === 'true' || value === 'Yes' || value === true) ? 'Yes' : 'No';
+                     }
+                     rows += `<td>${value}</td>`;
+                 }
+                 rows += '</tr>';
+             }
+             document.querySelector(`#${section} table tbody`).innerHTML = rows;
+         }
+     } catch (error) {
+         console.error(`Error fetching data for ${section}:`, error);
+         displayErrorInTable(section, `Error loading data.`);
+     }
+  }
+
+  // --- Utility Functions for Error Handling & Formatting ---
+  function displayErrorInTable(sectionId, message) {
+    const tbody = document.querySelector(`#${sectionId} table tbody`);
+    if (tbody) {
+        const colspan = tbody.previousElementSibling?.rows?.[0]?.cells?.length || 6;
+        tbody.innerHTML = `<tr><td colspan="${colspan}">${message}</td></tr>`;
+    } else if (sectionId === 'teams') {
+        document.getElementById("teams-list").innerHTML = `<p>${message}</p>`;
+    }
+  }
+   function displayErrorInAllTables(message) {
+      ['results', 'standings', 'calendar', 'teams'].forEach(id => {
+          const sectionElement = document.getElementById(id);
+          if (sectionElement) {
+              displayErrorInTable(id, message);
+          }
+      });
+   }
+
+ function formatDate(dateInput) {
+    if (!dateInput) return '';
+    try {
+        const d = new Date(dateInput);
+        if (isNaN(d.getTime())) return dateInput;
+         if (typeof dateInput === 'string' && dateInput.match(/^\d{4}-\d{2}-\d{2}$/)) {
+             const utcTimestamp = Date.UTC(parseInt(dateInput.substring(0,4)), parseInt(dateInput.substring(5,7)) - 1, parseInt(dateInput.substring(8,10)));
+              if (isNaN(utcTimestamp)) return dateInput;
+              return new Date(utcTimestamp).toLocaleDateString('en-US', { day: '2-digit', month: 'short', timeZone: 'UTC' });
+         }
+        return d.toLocaleDateString('en-US', { day: '2-digit', month: 'short' });
+    } catch (e) {
+        console.error("Error formatting date:", dateInput, e);
+        return dateInput;
+    }
+  }
+
+  // --- Initial Load ---
+  window.onload = () => {
+      console.log("Window loaded. Starting initial data load.");
+      loadInitialData();
+  };
+</script>
+
+</body>
+</html>
